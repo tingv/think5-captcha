@@ -14,10 +14,7 @@
     "autoload": {
         "psr-4": {
             "think5\\captcha\\": "src/"
-        },
-        "files": [
-            "src/helper.php"
-        ]
+        }
     },
     "config": {
         "allow-plugins": {
