@@ -51,6 +51,7 @@ class NoSessionCaptcha
 
     private $im    = null; // 验证码图片实例
     private $color = null; // 验证码字体颜色
+    private $code  = null; // 验证码
     private $verify_code = null; // 校验码
     private $verify_time = null; // 验证码创建时间
     private $contents    = null; // 验证码图片内容
@@ -112,9 +113,8 @@ class NoSessionCaptcha
      */
     public function check($code, $id = '', $verify_code, $verify_time)
     {
-        $key = $this->authcode($this->seKey) . $id;
         // 除了 $id，各参数不能为空
-        if (empty($code) || empty($secode) || empty($verify_code) || empty($verify_time)) {
+        if (empty($code) || empty($verify_code) || empty($verify_time)) {
             return false;
         }
         // 验证码过期
@@ -196,15 +196,22 @@ class NoSessionCaptcha
         }
 
         // 保存验证码
-        $key                   = $this->authcode($this->seKey);
-        $code                  = $this->authcode(strtoupper(implode('', $code)));
-        $this->verify_code     = $code; // 校验码
+        $this->code            = implode('', $code); // 验证码
+        $this->verify_code     = $this->authcode(strtoupper($this->code)); // 校验码
         $this->verify_time     = time(); // 验证码创建时间
 
         // 输出图像
         ob_start();
         imagepng($this->im);
         return ob_get_clean();
+    }
+
+    /**
+     * 验证码
+     */
+    public function getCode()
+    {
+        return $this->code;
     }
 
     /**
