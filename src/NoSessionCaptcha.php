@@ -106,14 +106,13 @@ class NoSessionCaptcha
      * 验证验证码是否正确
      * @access public
      * @param string $code 用户验证码
-     * @param string $id   验证码标识
      * @param string $verify_code 校验码
      * @param int $verify_time 验证码创建时间
      * @return bool 用户验证码是否正确
      */
-    public function check($code, $id = '', $verify_code, $verify_time)
+    public function check($code, $verify_code, $verify_time)
     {
-        // 除了 $id，各参数不能为空
+        // 各参数不能为空
         if (empty($code) || empty($verify_code) || empty($verify_time)) {
             return false;
         }
@@ -133,10 +132,9 @@ class NoSessionCaptcha
     /**
      * 输出验证码图片(png)内容
      * @access public
-     * @param string $id 要生成验证码的标识
      * @return string|false 返回输出缓冲区的内容，并结束输出缓冲区。如果输出缓冲区不是活跃的，即返回 false 。
      */
-    public function entry($id = '')
+    public function entry()
     {
         // 图片宽(px)
         $this->imageW || $this->imageW = $this->length * $this->fontSize * 1.5 + $this->length * $this->fontSize / 2;
