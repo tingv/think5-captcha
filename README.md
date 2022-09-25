@@ -5,9 +5,9 @@
 > composer require tingv/think5-captcha
 
 
-##使用
+## 使用
 
-###模板里输出验证码
+### 模板里输出验证码
 
 ~~~
 <div>{:captcha_img()}</div>
