@@ -14,7 +14,7 @@ namespace think5\captcha;
 /*
  * 无 Session 的验证码，便于 TG Bot 使用
  */
-class Captcha
+class NoSessionCaptcha
 {
     protected $config = [
         'seKey'    => 'ThinkPHP.CN',
