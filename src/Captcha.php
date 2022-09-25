@@ -11,8 +11,9 @@
 
 namespace think5\captcha;
 
-use think\facade\Session;
-
+/*
+ * 无 Session 的验证码，便于 TG Bot 使用
+ */
 class Captcha
 {
     protected $config = [
@@ -50,6 +51,10 @@ class Captcha
 
     private $im    = null; // 验证码图片实例
     private $color = null; // 验证码字体颜色
+    private $code  = null; // 验证码
+    private $verify_code = null; // 校验码
+    private $verify_time = null; // 验证码创建时间
+    private $contents    = null; // 验证码图片内容
 
     /**
      * 架构方法 设置参数
@@ -101,25 +106,23 @@ class Captcha
      * 验证验证码是否正确
      * @access public
      * @param string $code 用户验证码
-     * @param string $id   验证码标识
+     * @param string $verify_code 校验码
+     * @param int $verify_time 验证码创建时间
      * @return bool 用户验证码是否正确
      */
-    public function check($code, $id = '')
+    public function check($code, $verify_code, $verify_time)
     {
-        $key = $this->authcode($this->seKey) . $id;
-        // 验证码不能为空
-        $secode = Session::get($key, '');
-        if (empty($code) || empty($secode)) {
+        // 各参数不能为空
+        if (empty($code) || empty($verify_code) || empty($verify_time)) {
             return false;
         }
-        // session 过期
-        if (time() - $secode['verify_time'] > $this->expire) {
-            Session::delete($key, '');
+        // 验证码过期
+        if (time() - $verify_time > $this->expire) {
             return false;
         }
 
-        if ($this->authcode(strtoupper($code)) == $secode['verify_code']) {
-            $this->reset && Session::delete($key, '');
+        // 验证成功
+        if ($this->authcode(strtoupper($code)) == $verify_code) {
             return true;
         }
 
@@ -127,13 +130,11 @@ class Captcha
     }
 
     /**
-     * 输出验证码并把验证码的值保存的session中
-     * 验证码保存到session的格式为： array('verify_code' => '验证码值', 'verify_time' => '验证码创建时间');
+     * 输出验证码图片(png)内容
      * @access public
-     * @param string $id 要生成验证码的标识
-     * @return \think\Response
+     * @return string|false 返回输出缓冲区的内容，并结束输出缓冲区。如果输出缓冲区不是活跃的，即返回 false 。
      */
-    public function entry($id = '')
+    public function entry()
     {
         // 图片宽(px)
         $this->imageW || $this->imageW = $this->length * $this->fontSize * 1.5 + $this->length * $this->fontSize / 2;
@@ -193,20 +194,46 @@ class Captcha
         }
 
         // 保存验证码
-        $key                   = $this->authcode($this->seKey);
-        $code                  = $this->authcode(strtoupper(implode('', $code)));
-        $secode                = [];
-        $secode['verify_code'] = $code; // 把校验码保存到session
-        $secode['verify_time'] = time(); // 验证码创建时间
-        Session::set($key . $id, $secode, '');
+        $this->code            = implode('', $code); // 验证码
+        $this->verify_code     = $this->authcode(strtoupper($this->code)); // 校验码
+        $this->verify_time     = time(); // 验证码创建时间
 
-        ob_start();
         // 输出图像
+        ob_start();
         imagepng($this->im);
-        $content = ob_get_clean();
-        imagedestroy($this->im);
+        return ob_get_clean();
+    }
 
-        return response($content, 200, ['Content-Length' => strlen($content)])->contentType('image/png');
+    /**
+     * 验证码
+     */
+    public function getCode()
+    {
+        return $this->code;
+    }
+
+    /**
+     * 获取校验码
+     */
+    public function getVerifyCode()
+    {
+        return $this->verify_code;
+    }
+
+    /**
+     * 获取验证码创建时间
+     */
+    public function getVerifyTime()
+    {
+        return $this->verify_time;
+    }
+
+    /**
+     * 获取验证码图片内容
+     */
+    public function getContents()
+    {
+        return $this->contents;
     }
 
     /**
