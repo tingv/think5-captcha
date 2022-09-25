@@ -201,13 +201,10 @@ class NoSessionCaptcha
         $this->verify_code     = $code; // 校验码
         $this->verify_time     = time(); // 验证码创建时间
 
-        ob_start();
         // 输出图像
+        ob_start();
         imagepng($this->im);
-        $thin->contents = ob_get_clean();
-        imagedestroy($this->im);
-
-        return $thin->contents;
+        return ob_get_clean();
     }
 
     /**
